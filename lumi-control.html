@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lampada</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Prevent scrollbars */
+            font-family: sans-serif;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            background-color: black;
+            transition: background-color 0.3s ease-in-out;
+            position: relative;
+        }
+
+        #toggle-button {
+            cursor: pointer;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.2); /* Better base contrast */
+            border: 3px solid rgba(255, 255, 255, 0.1); /* Thicker, defining border */
+            transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out, border-color 0.3s ease;
+        }
+
+        #toggle-button:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #toggle-button.on {
+            background-color: rgba(255, 255, 0, 0.3); /* Subtle yellow glow when on */
+            border-color: rgba(255, 255, 255, 0.7); /* Much more opaque border */
+            animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        #toggle-button svg {
+            width: 60px;
+            height: 60px;
+            stroke: #ccc; /* Default icon color */
+            fill: none;
+            transition: stroke 0.3s ease-in-out, fill 0.3s ease-in-out;
+        }
+
+        #toggle-button.on svg {
+            stroke: #fff; /* White stroke when on */
+            fill: #ffeb3b; /* Yellow fill when on */
+        }
+
+        #brightness-slider {
+            position: absolute;
+            bottom: 80px; /* Adjusted position */
+            width: 80%;
+            max-width: 400px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #333;
+            outline: none;
+            display: none;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 4px;
+        }
+
+        #temperature-slider {
+            position: absolute;
+            bottom: 20px;
+            width: 80%;
+            max-width: 400px;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            /* Gradient from warm yellow to cool white */
+            background: linear-gradient(to right, #FFDDA1, #E0EFFF);
+            outline: none;
+            display: none;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 4px;
+            border: 1px solid #444;
+        }
+
+        #brightness-slider.visible,
+        #temperature-slider.visible {
+            display: block;
+        }
+
+        #brightness-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #brightness-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        #temperature-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #fff;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='12' cy='12' r='5'%3e%3c/circle%3e%3cline x1='12' y1='1' x2='12' y2='3'%3e%3c/line%3e%3cline x1='12' y1='21' x2='12' y2='23'%3e%3c/line%3e%3cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'%3e%3c/line%3e%3cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'%3e%3c/line%3e%3cline x1='1' y1='12' x2='3' y2='12'%3e%3c/line%3e%3cline x1='21' y1='12' x2='23' y2='12'%3e%3c/line%3e%3cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'%3e%3c/line%3e%3cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'%3e%3c/line%3e%3c/svg%3e");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 20px 20px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #temperature-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        #brightness-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #brightness-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        #temperature-slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #fff;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3ccircle cx='12' cy='12' r='5'%3e%3c/circle%3e%3cline x1='12' y1='1' x2='12' y2='3'%3e%3c/line%3e%3cline x1='12' y1='21' x2='12' y2='23'%3e%3c/line%3e%3cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'%3e%3c/line%3e%3cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'%3e%3c/line%3e%3cline x1='1' y1='12' x2='3' y2='12'%3e%3c/line%3e%3cline x1='21' y1='12' x2='23' y2='12'%3e%3c/line%3e%3cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'%3e%3c/line%3e%3cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'%3e%3c/line%3e%3c/svg%3e");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 20px 20px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #temperature-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="toggle-button">
+            <!-- Lightbulb SVG icon (Feather Icons) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2z"></path>
+                <path d="M12 22v-4"></path>
+                <path d="M12 2a6 6 0 0 0-6 6c0 4.5 3 9 6 9s6-4.5 6-9a6 6 0 0 0-6-6z"></path>
+            </svg>
+        </div>
+        <input type="range" id="brightness-slider" min="0" max="100" value="100">
+        <input type="range" id="temperature-slider" min="0" max="100" value="50">
+    </div>
+
+    <script>
+        const app = document.getElementById('app');
+        const toggleButton = document.getElementById('toggle-button');
+        const brightnessSlider = document.getElementById('brightness-slider');
+        const temperatureSlider = document.getElementById('temperature-slider');
+        const lightbulbSVG = toggleButton.querySelector('svg');
+
+        let isLampOn = false;
+        let currentBrightness = 100; // 0-100
+        let currentTemperature = 50; // 0-100, 0=warm, 100=cool
+
+        // Function to update the background color based on brightness and temperature
+        function updateBackgroundColor() {
+            if (isLampOn) {
+                const hue = 60 - (currentTemperature / 100) * 20; // Hue from 60 (yellow) to 40 (more orangish)
+                const saturation = 100 - (currentTemperature / 100) * 100;
+
+                // Adjust max lightness based on saturation.
+                const maxLightnessForColor = 100 - (saturation / 2);
+                let lightness = (currentBrightness / 100) * maxLightnessForColor;
+
+                // Cap the lightness at 98% when cool to avoid pure white, so glow is visible
+                if (saturation < 10) { // Apply cap on cool/white colors
+                    lightness = Math.min(lightness, 98);
+                }
+
+                app.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            } else {
+                app.style.backgroundColor = 'black';
+            }
+        }
+
+        // Toggle lamp on/off
+        toggleButton.addEventListener('click', () => {
+            isLampOn = !isLampOn;
+
+            if (isLampOn) {
+                toggleButton.classList.add('on');
+                brightnessSlider.classList.add('visible');
+                temperatureSlider.classList.add('visible');
+                brightnessSlider.value = currentBrightness;
+                temperatureSlider.value = currentTemperature;
+            } else {
+                toggleButton.classList.remove('on');
+                brightnessSlider.classList.remove('visible');
+                temperatureSlider.classList.remove('visible');
+            }
+            updateBackgroundColor();
+        });
+
+        // Update brightness when slider moves
+        brightnessSlider.addEventListener('input', (event) => {
+            currentBrightness = event.target.value;
+            if (isLampOn) {
+                updateBackgroundColor();
+            }
+        });
+
+        // Update temperature when slider moves
+        temperatureSlider.addEventListener('input', (event) => {
+            currentTemperature = event.target.value;
+            if (isLampOn) {
+                updateBackgroundColor();
+            }
+        });
+
+        // Initial state setup
+        updateBackgroundColor(); // Ensure background is black initially
+
+    </script>
+</body>
+</html>
